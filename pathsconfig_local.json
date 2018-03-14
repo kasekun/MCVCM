@@ -1,0 +1,14 @@
+{
+	"ELAIS":{	"radio_continuum"	: "data/ELAIS/ELAISmosaic_allch_8March2015.fits",
+				"radio_rms"			: "data/ELAIS/ELAISmosaic_allch_noise_8March2015.fits",
+				"infrared_mosaic"	: "data/ELAIS/elais_mosaic.fits",
+				"radio_catalog"		: "data/ELAIS/ATLASDR3_ELAIScmpcat_23July2015.dat",
+				"swire_catalog"		: "data/ELAIS/SWIRE_ELAISS1-FALL05.fits"
+	},
+	"CDFS" :{ 	"radio_continuum"	: "data/CDFS/CDFSmosaic_allch_8March2015.fits",
+				"radio_rms"			: "data/CDFS/CDFSmosaic_allch_noise_8March2015.fits",
+				"infrared_mosaic"	: "data/CDFS/cdfs_mosaic.fits",
+				"radio_catalog"		: "data/CDFS/ATLASDR3_CDFScmpcat_23July2015.dat",
+				"swire_catalog"		: "data/CDFS/SWIRE-CDFS-FALL05.fits"
+	}	
+}
