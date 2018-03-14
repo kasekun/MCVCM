@@ -1,11 +1,11 @@
 import matplotlib
 import tkinter
-
 matplotlib.use("TkAgg")
 
-import matplotlib
 if matplotlib.get_backend() != 'TkAgg':
-    raise Exception('current matplotlib backend <\'%s\'> might result in a crash when used with <tkinter>, please use <\'TkAgg\'> backend' %matplotlib.get_backend())
+    raise Exception(
+        f'current matplotlib backend <{matplotlib.get_backend()}> might result in a crash when used with <tkinter>, '
+        f'please use <TkAgg> backend')
 
 
 class _ConstrainedEntry(tkinter.Entry):
