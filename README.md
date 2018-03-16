@@ -27,7 +27,7 @@ IF AT ANY TIME YOU NEED TO RESTORE TO AN OLD BACKUP, SIMPLY OVERWRITE THE MASTER
 	The script is designed to be run with a few flags at choice, and a necessary positional argument choosing 'ELAIS' or 'CDFS'.
 	The flags allow for saving of cross-identified final figures (THIS IS TIME CONSUMING AND CAN BE DONE IN BATCH POST-IDENTIFICATION), and output of diagnostic information and timings, as well as allowing identification of sources that were previously skipped.
 
-		usage: ATLASmultiID-SWIREv5.py [-h] [-v] [-t] [-x] [--savefigs {png,eps,pdf}]
+		usage: mcvcm [-h] [-v] [-t] [-x] [--savefigs {png,eps,pdf}]
 		                               {CDFS,ELAIS}
 
 		********************************************************************************
