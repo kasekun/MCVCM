@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import time
+import os
 import shutil
 
 
@@ -19,7 +19,7 @@ def print_center(*args):
 # goo.gl/8jAuN5c
 def make_folder(path):
     ''' Makes folder if it doesn't exist '''
-    import os, errno
+    import errno
     try:
         os.makedirs(path)
     except OSError as exception:
@@ -48,24 +48,20 @@ def version_control(filename):
         Creates numbered copy of that file,
         Numbers file appropriately if numbered file already exists
     '''
-    try:
-        import shutil
-    except Exception as e:
-        print('Import failed: ', e)
 
-    path, format = filename.split('.')
-    bkup_int = 1
-    bkup_path = path + '-bkp-%s' % ('{:02d}'.format(bkup_int))
+    path, exten = os.path.splitext(filename)
+    bkp_int = 1
+    bkp_path = '{}-bkp-{:02d}'.format(path, bkp_int)
 
-    print('Found a preexisting file: %s' % (filename))
+    print(f'Found a preexisting file: {filename}')
 
-    while file_accessible(bkup_path + '.%s' % (format)):
-        print('also found %s' % (bkup_path + '.%s' % (format)))
-        bkup_int += 1
-        bkup_path = path + '-bkp-%s' % ('{:02d}'.format(bkup_int))
+    while file_accessible(f'{bkp_path}{exten}'):
+        print(f'also found {bkp_path}{exten}')
+        bkp_int += 1
+        bkp_path = '{}-bkp-{:02d}'.format(path, bkp_int)
 
-    print('Backing up file to: %s' % (bkup_path + '.%s' % (format)))
-    shutil.copy2(filename, bkup_path + '.%s' % (format))
+    print(f'Backing up file to: {bkp_path}{exten}')
+    shutil.copy2(filename, f'{bkp_path}{exten}')
 
 
 class Crosshair(object):
@@ -79,7 +75,7 @@ class Crosshair(object):
         but the functions are pretty self-explanatory
     '''
 
-    def __init__(self,xloc,yloc,axis, size = 0.1, gap = 0.025, **kwargs):
+    def __init__(self, xloc, yloc, axis, size=0.1, gap=0.025, **kwargs):
         self.xloc = xloc
         self.yloc = yloc
         self.axis = axis

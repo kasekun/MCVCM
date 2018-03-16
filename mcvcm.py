@@ -53,7 +53,6 @@
 from __future__ import print_function
 
 import matplotlib
-import os
 
 matplotlib.use("TkAgg") # necessary for use with tkinter
 
@@ -63,16 +62,21 @@ import argparse
 import textwrap
 from utilities import *
 from tkComment import tkComment
+import json
 
 
-def runtkc():     
+def runtkc():
     global tkC
     tkC = tkComment()
     tkC.root.mainloop()
 
 
+with open('path_config.json', 'r') as config:
+    field_choices = tuple(json.load(config).keys())
+
+
 parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
-            description= textwrap.dedent('''\
+                                 description=textwrap.dedent('''\
             ********************************************************************************
             Interactive program for catalogue cross-identification.
             Displays infrared heatmap and radio contours with catalogue sources over-laid. 
@@ -84,8 +88,8 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
             \t\tComponent #1:  SWIRE3_J003940.76-432549*EI1896*m2*C1
             \t\tComponent #2:  SWIRE3_J003940.76-432549*EI1896*m2*C2
 
-            output tables are stored in ./XID_tables/
-            output figures are stored in ./XID_figs/
+            output tables are stored in ./output/tables
+            output figures are stored in ./output/figures
 
             press h in the plotting window for a list of basic controls
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -98,9 +102,10 @@ parser.add_argument('-x', help='if specified, processes only sources marked as \
 parser.add_argument('-d', help='if specified, does a dummy demo dose of \'dentification', action='store_true',
                     default=False)
 parser.add_argument('--savefigs', dest='figs', default=None, choices=['png', 'eps', 'pdf'],
-                    help='if provided with an extenstion saves final IDd\nfigures to that format (e.g. --savefigs png)')
+                    help='if file extenstion also provided saves final IDd\nfigures to that format (e.g. --savefigs '
+                         'png)')
 
-parser.add_argument('field', choices = ['CDFS','ELAIS'], help='Specify if we are working on ELAIS or CDFS')
+parser.add_argument('field', choices=field_choices, help=f'specify the field we are working on from: {field_choices}')
 
 args = parser.parse_args()
 field = args.field
@@ -134,10 +139,11 @@ if verbose:
         for arg in args:
             print(arg,)
         print()
-else: 
+else:
     verboseprint = lambda *a: None	 # do nothing
 
-# ****************************************** #	
+
+# ****************************************** #
 # 		The nitty gritty of the program
 # ****************************************** #
 
@@ -147,8 +153,8 @@ class Identity(object):
         Handles the storage of selected source identities
         and XID tag creation from catalogue IDs
     '''
-    default_rad_host = ('Rnohost',-999)
-    default_inf_host = ('Inohost',-999)
+    default_rad_host = ('Rnohost', -999)
+    default_inf_host = ('Inohost', -999)
 
     def __init__(self):
         self.inf_host = self.default_inf_host
@@ -193,11 +199,11 @@ class Identity(object):
             self.xid_tags = []
 
         if self.rad_host == self.default_rad_host and len(self.components):
-            print_center("\n\t***** Warning: Removed first component and used as radio core ID as this was empty ******\n")
+            print_center("\n\t**** WARNING: Removed first component and used as radio core ID as this was empty ****\n")
             self.rad_host = self.components.pop(0)
 
-        if self.rad_host == self.default_rad_host: #yes, for when components is also empty
-            component_count = len(self.components)+0 # catch for 'm%i' below defaulting to m1
+        if self.rad_host == self.default_rad_host:  # yes, for when components is also empty
+            component_count = len(self.components) + 0  # catch for 'm%i' below defaulting to m1
         else:
             component_count = len(self.components)+1
 
@@ -221,7 +227,9 @@ class Identity(object):
             # to the combined source in the catalogue
 
         return self.xid_tags
-# ------------------------------------------ #	
+
+
+# ------------------------------------------ #
 @verbwrap
 def onpick(event):
     '''
@@ -413,15 +421,6 @@ def on_key(event):
         print('...............................')
         print('...............................')
 
-# # ------------------------------------------ #
-# @verbwrap
-# def onscroll(event):
-# 	'''
-# 		Handles mouse wheel scrolls
-# 		Empty for now (was going to be for zooming)
-# 	'''
-# 	verboseprint('Scrolly-polly...')
-
 # ------------------------------------------ #
 @verbwrap
 def update_table(whole_table=False):
@@ -488,24 +487,23 @@ def next_phase():
         retains clicked point markers,
         plots new scatter data,
     '''
-    global phase, sources, tit
+    global phase, sources, phase_title
 
     if phase == 1:
         # Switch to radio host tags/data
         sources.remove()
         sources, = ax.plot(rData[rRA_column], rData[rDEC_column], '+g', ms=6, picker=6, transform=axtrans)
-        tit = 'Radio core ID'
-        ax.set_title(tit)
+        phase_title = 'Radio core ID'
+        ax.set_title(phase_title)
         fig.canvas.draw_idle()
     if phase == 2:
         # Switch to radio comp tags
         sources.remove()
         sources, = ax.plot(rData[rRA_column], rData[rDEC_column], '*g', ms=6, picker=6, transform=axtrans)
-        tit = 'Radio component IDs'
-        ax.set_title(tit)
+        phase_title = 'Radio component IDs'
+        ax.set_title(phase_title)
         fig.canvas.draw_idle()
     phase += 1
-
 
 # ------------------------------------------ #
 @verbwrap
@@ -593,19 +591,20 @@ def check_save():
 
     verboseprint('\nrecovered %i IDs from previous session' %count)
 
-# ------------------------------------------ #	
+
+# ------------------------------------------ #
 @verbwrap
 def save_fig(rID, manual = False):
     '''
         Saves displayed figure to format specified
         by command line argument
     '''
-    global sources, tit
+    global sources, phase_title
     if manual or fig_extention != None:
         print('Saving figure ...')
         # clean up figure
         # sources.remove()
-        tit = rID
+        phase_title = rID
         ax.set_title('')
 
         # Name and save figure
@@ -622,7 +621,8 @@ def save_fig(rID, manual = False):
         if manual: # restart ID as sources are now removed
             cleanup()
 
-# ------------------------------------------ #	
+
+# ------------------------------------------ #
 @verbwrap
 def cleanup():
     '''
@@ -644,7 +644,8 @@ def cleanup():
     except NameError:
         pass
 
-# ------------------------------------------ #	
+
+# ------------------------------------------ #
 @verbwrap
 def start():
     '''
@@ -654,7 +655,7 @@ def start():
     '''
     global compCount
     global phase
-    global fig, ax, axtrans, sources, tit, wcsmap
+    global fig, ax, axtrans, sources, phase_title, wcsmap
     global clicks
     global keyID, clickID
     global iData, rData
@@ -665,9 +666,9 @@ def start():
 
     ident = Identity()
     # Some default values
-    tit = 'Infrared host ID' # plot titles
-    phase = 1 # Identification phase
-    certainty = 1 # Identification certainty default
+    phase_title = 'Infrared host ID'  # plot titles
+    phase = 1  # Identification phase
+    certainty = 1  # Identification certainty default
 
     # Say farewell, save table, and exit!
     if target_index == len(rTable):
@@ -689,7 +690,7 @@ def start():
     # Grab figure, axis object, and axis transform from cutoutslink.py
     fig, ax, axtrans, wcsmap = cutout.cutouts(mosaic, radioSB, radioRMS, tRA, tDEC,
                                               isize=ipix_current, rsize=rpix_current, verbose=verbose)
-    ax.set_title(tit)
+    ax.set_title(phase_title)
     fig.canvas.draw_idle()
 
     # select catalogue sources from a region around target to mininimise plotting time
@@ -704,9 +705,11 @@ def start():
     clickID = fig.canvas.mpl_connect('pick_event', onpick)
 
     plt.subplots_adjust(left=0.05, right=0.9, top=0.9, bottom=0.1)
-    plt.get_current_fig_manager().window.wm_geometry("+0+0")
+    plt.get_current_fig_manager().window.wm_geometry(f"+{figure_pos_horizontal}+{figure_pos_vertical}")
     plt.show()
-# ------------------------------------------ #	
+
+
+# ------------------------------------------ #
 
 # ------------------------------------------ #	
 # Initial setup
@@ -752,6 +755,9 @@ else:
 with open('parameter_config.json', 'r') as config:
     parameter_config = json.load(config)
 
+figure_pos_horizontal = parameter_config["figure_position"]["horizontal"]
+figure_pos_vertical = parameter_config["figure_position"]["vertical"]
+
 ipix_default = parameter_config['cutout_pixels']["infrared"]
 rpix_default = parameter_config['cutout_pixels']["radio"]
 ipix_current, rpix_current = ipix_default, rpix_default  # sets the size (in pixels) of the slice
@@ -782,8 +788,7 @@ rTable.add_column(Column([0, ] * len(rTable), name='mcvcm_flag'))
 print(f'\nReading infrared table: {infrared_catalogue}')
 iTable = fits.open(infrared_catalogue)[1].data
 
-
-# ------------------------------------------ #	
+# ------------------------------------------ #
 # generate coordinate lookup array
 iCoords = SkyCoord(np.array(iTable[iRA_column]), np.array(iTable[iDEC_column]), frame='fk5', unit='deg')
 rCoords = SkyCoord(np.array(rTable[rRA_column]), np.array(rTable[rDEC_column]), frame='fk5', unit='deg')

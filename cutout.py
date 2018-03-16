@@ -26,17 +26,17 @@ from __future__ import division
 from __future__ import print_function
 
 import time
+import warnings
 
 import astropy.wcs as wcs
-from astropy.io import fits
 import matplotlib.pyplot as plt
 import numpy as np
 import reproject
-
-import warnings
+from astropy.io import fits
 from astropy.utils.exceptions import AstropyWarning
 
 warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
+warnings.filterwarnings('ignore', category=RuntimeWarning)
 # matplotlib.rcParams.update({'figure.autolayout': True})
 
 verbose = False
@@ -57,7 +57,7 @@ else:  # a function that returns None
 
 
 # http://preshing.com/20110924/timing-your-code-using-pythons-with-statement/
-class Timer(object):    
+class Timer(object):
     '''
         Times imbedded code execution
         Example usage for averaging over 10 runs:
@@ -171,7 +171,7 @@ def cutouts(infrared_mosaic, radio_image, radio_rms, targetRA, targetDEC, isize=
     # fig.subplots_adjust(left=0.25, right=.60)
 
     axtrans = axis.get_transform(
-        'fk5')  # necessary for scattering data on later -- e.g ax.plot(data, transform=axtrans)
+            'fk5')  # necessary for scattering data on later -- e.g ax.plot(data, transform=axtrans)
 
     #### CHANGE VMAX HERE TO SUIT YOUR DATA - (I just experimented) #####
     # plotting
@@ -189,7 +189,7 @@ def cutouts(infrared_mosaic, radio_image, radio_rms, targetRA, targetDEC, isize=
 
 if __name__ == '__main__':
     ''' Test '''
- 
+
     ## ELAIS test files for testing ##
     radio = 'data/ELAIS/ELAISmosaic_allch_8March2015.fits'
     noise = 'data/ELAIS/ELAISmosaic_allch_noise_8March2015.fits'

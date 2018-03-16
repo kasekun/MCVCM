@@ -11,5 +11,9 @@
     "radio": 95,
     "infrared": 170
   },
-  "start_index": 0
+  "start_index": 0,
+  "figure_position": {
+    "horizontal": 0,
+    "vertical": 0
+  }
 }
