@@ -2,8 +2,10 @@
 
 
 ***************
-# Foreword
+# Foreword 
 ***************
+**Currently compatible with python3.6 only**
+
 This software is designed to easily facilitate manual cross-matching of a radio source catalogue, and infrared or optical source catalogue via visual inspection.
 
 Specifically, it iterates through the ATLAS component catalogue generating an infrared-cutout image with radio contours overlaid. 
