@@ -1,5 +1,4 @@
-# MCVCM
-Multi-Catalogue Visual Cross-Matching
+# MCVCM (Multi-Catalogue Visual Cross-Matching)
 
 
 ***************
