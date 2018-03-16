@@ -37,14 +37,15 @@ class tkComment(object):
         root = self.root = tkinter.Toplevel()
         self.comment = ''
         root.geometry("500x50+600+600")
-        tkinter.Button(root,text="save comment",command=lambda: self._assign(entryVar)).pack(anchor=tkinter.S,side=tkinter.BOTTOM)
+        tkinter.Button(root, text="save comment",
+                       command=lambda: self._assign(entryVar)).pack(anchor=tkinter.S, side=tkinter.BOTTOM)
         root.title('comment for this source:')
 
         root.bind('<Escape>', lambda e: self._assign(entryVar))
         root.bind('<Return>', lambda e: self._assign(entryVar))
 
         entryVar = self.entryVar = tkinter.StringVar()
-        entry = self.entry = _ConstrainedEntry(charlimit = 53, master=root, width=60, textvariable=self.entryVar)
+        entry = self.entry = _ConstrainedEntry(charlimit=53, master=root, width=60, textvariable=self.entryVar)
         entry.pack(side=tkinter.TOP)
 
         root.attributes("-topmost", True)
@@ -52,7 +53,6 @@ class tkComment(object):
 
     def _assign(self,var):
         self.comment=var.get()
-        # print(self.comment) # for testing
         self.root.destroy()
 
 

@@ -28,26 +28,44 @@ def make_folder(path):
     return os.path.abspath(path)
 
 
-# goo.gl/dZ4nBO
-class Timer(object):    
+def file_accessible(filepath, mode='r'):
     '''
-        Times imbedded code execution
-        Example usage for averaging over 10 runs:
-
-        ts = []
-        for i in range(10):
-            with Timer() as t:
-                <RUN CODE>
-            ts.append(t.interval)
-        print 'mean was', np.mean(ts)
+        Check if a file exists and is accessible (read by default)
     '''
-    def __enter__(self):
-        self.start = time.clock()
-        return self
+    try:
+        f = open(filepath, mode)
+        f.close()
+    except IOError as e:
+        return False
+    return True
 
-    def __exit__(self, *args):
-        self.end = time.clock()
-        self.interval = self.end - self.start
+
+def version_control(filename):
+    '''
+        Primative version control:
+
+        Checks for instance of a file,
+        Creates numbered copy of that file,
+        Numbers file appropriately if numbered file already exists
+    '''
+    try:
+        import shutil
+    except Exception as e:
+        print('Import failed: ', e)
+
+    path, format = filename.split('.')
+    bkup_int = 1
+    bkup_path = path + '-bkp-%s' % ('{:02d}'.format(bkup_int))
+
+    print('Found a preexisting file: %s' % (filename))
+
+    while file_accessible(bkup_path + '.%s' % (format)):
+        print('also found %s' % (bkup_path + '.%s' % (format)))
+        bkup_int += 1
+        bkup_path = path + '-bkp-%s' % ('{:02d}'.format(bkup_int))
+
+    print('Backing up file to: %s' % (bkup_path + '.%s' % (format)))
+    shutil.copy2(filename, bkup_path + '.%s' % (format))
 
 
 class Crosshair(object):
@@ -77,23 +95,22 @@ class Crosshair(object):
             print('please specify cursor gap from 0 to 1 (0 to 100% of plot dimensions)')
             return
         if gap > size or gap == size:
-            print('Ensure that the cursor gap is smaller than the cursor size')
+            print('ensure that the cursor gap is smaller than the cursor size')
             return
         self.draw(**kwargs)
 
     def draw(self,**kwargs):
-        y0,y1 = self.axis.get_ybound()
-        x0,x1 = self.axis.get_xbound()
+        y0, y1 = self.axis.get_ybound()
+        x0, x1 = self.axis.get_xbound()
 
         dx = x1 - x0
         dy = y1 - y0
-        # print 'DX, and DY %f,%f' %(dx,dy)
         self.hline = self.axis.hlines([self.yloc,self.yloc],
-                    [self.xloc-self.size*dx,self.xloc+self.size*dx],
-                    [self.xloc-self.gap*dx,self.xloc+self.gap*dx],**kwargs)
+                                      [self.xloc - self.size * dx, self.xloc + self.size * dx],
+                                      [self.xloc - self.gap * dx, self.xloc + self.gap * dx], **kwargs)
         self.vline = self.axis.vlines([self.xloc,self.xloc],
-                    [self.yloc-self.size*dy,self.yloc+self.size*dy],
-                    [self.yloc-self.gap*dy,self.yloc+self.gap*dy],**kwargs)
+                                      [self.yloc - self.size * dy, self.yloc + self.size * dy],
+                                      [self.yloc - self.gap * dy, self.yloc + self.gap * dy], **kwargs)
 
     def remove(self):
         if self.hline is None or self.vline is None:
@@ -114,41 +131,3 @@ class Crosshair(object):
         self.vline.set_visible(not self.vline.get_visible())
 
 
-def file_accessible(filepath, mode='r'):
-    '''
-        Check if a file exists and is accessible (read by default)
-    '''
-    try:
-        f = open(filepath, mode)
-        f.close()
-    except IOError as e:
-        return False
-    return True
-
-
-def version_control(filename):
-    '''
-        Primative version control:
-
-        Checks for instance of a file,
-        Creates numbered copy of that file,
-        Numbers file appropriately if numbered file already exists
-    '''
-    try:
-        import shutil
-    except Exception as e:
-        print('Import failed: ', e)
-
-    path, format = filename.split('.')
-    bkup_int = 1
-    bkup_path = path+'-bkp-%s' %('{:02d}'.format(bkup_int))
-
-    print('Found a preexisting file: %s' %(filename))
-
-    while file_accessible(bkup_path+'.%s' %(format)):
-        print('also found %s' %(bkup_path+'.%s' %(format)))
-        bkup_int += 1
-        bkup_path = path+'-bkp-%s' %('{:02d}'.format(bkup_int))
-
-    print('Backing up file to: %s' %(bkup_path+'.%s' %(format)))
-    shutil.copy2(filename, bkup_path+'.%s' %(format))

@@ -1,0 +1,15 @@
+{
+  "column_names": {
+    "radio_ra": "RA_deg",
+    "radio_dec": "Dec_deg",
+    "radio_id": "ID",
+    "infrared_ra": "ra",
+    "infrared_dec": "dec",
+    "infrared_id": "object"
+  },
+  "cutout_pixels": {
+    "radio": 95,
+    "infrared": 170
+  },
+  "start_index": 0
+}
