@@ -120,12 +120,7 @@ def verbwrap(function):
             mid = len(demarc)//2
             spacer = demarc[:mid] + ' %s ' %function.__name__ + demarc[mid:]
             print_center('',spacer)
-            if timeon:
-                with Timer() as t:
-                    result = function(*args, **kwargs)
-                print_center('\nTIMING:\nThat took %fs\n' %(t.interval))
-            else:
-                result = function(*args, **kwargs)
+            result = function(*args, **kwargs)
             print_center(spacer.replace('*','^'))
             return result
         else:
@@ -444,7 +439,7 @@ def update_table(whole_table=False):
         print('No data to save!')
     else:
         verboseprint('Saving radio table ...')
-        ascii.write(rsave, save_path, format='fixed_width_two_line')
+        ascii.write(rsave, save_path, format='fixed_width_two_line', overwrite=True)
         verboseprint('Saved!')
 
 # ------------------------------------------ #
@@ -469,7 +464,7 @@ def tag_generator():
         try:
             rTable['mcvcm_comment'][tag[1]] = tkC.entryVar.get()
         except (AttributeError, NameError) as E:
-            pass #leave comment as placeholder
+            pass  # comment remains as placeholder value
 
 
 # ------------------------------------------ #
@@ -691,13 +686,11 @@ def start():
     verboseprint('target RA,Dec = ', tRA, tDEC)
     target = SkyCoord(tRA, tDEC, frame='fk5', unit='deg')
 
-    with Timer() as t:
-        # Grab figure, axis object, and axis transform from cutoutslink.py
-        fig, ax, axtrans, wcsmap = cutout.cutouts(mosaic, radioSB, radioRMS, tRA, tDEC,
-                                                  osize=ipix_current, rsize=rpix_current, verbose=verbose)
-        ax.set_title(tit)
-        fig.canvas.draw_idle()
-    print('cutout generation took  %fs' %t.interval)
+    # Grab figure, axis object, and axis transform from cutoutslink.py
+    fig, ax, axtrans, wcsmap = cutout.cutouts(mosaic, radioSB, radioRMS, tRA, tDEC,
+                                              osize=ipix_current, rsize=rpix_current, verbose=verbose)
+    ax.set_title(tit)
+    fig.canvas.draw_idle()
 
     # select catalogue sources from a region around target to mininimise plotting time
     iData = iTable[iCoords.separation(target) < 240 * u.arcsec]
@@ -780,17 +773,15 @@ tag_placeholder = '-' * 53  # placeholder needs to be same length as MAX final ^
 comment_placeholder = '-' * 53
 skipped_placeholder = '---crossmatch_skipped-redo_by_running_with_-x_flag---'
 
-with Timer() as tt:
-    print(f'\nReading radio table: {radio_catalogue}')
-    rTable = ascii.read(radio_catalogue)
-    rTable.add_column(Column([tag_placeholder, ] * len(rTable), name='mcvcm_tag'))
-    rTable.add_column(Column([comment_placeholder, ] * len(rTable), name='mcvmc_comment'))
-    rTable.add_column(Column([0, ] * len(rTable), name='mcvcm_flag'))
+print(f'\nReading radio table: {radio_catalogue}')
+rTable = ascii.read(radio_catalogue)
+rTable.add_column(Column([tag_placeholder, ] * len(rTable), name='mcvcm_tag'))
+rTable.add_column(Column([comment_placeholder, ] * len(rTable), name='mcvcm_comment'))
+rTable.add_column(Column([0, ] * len(rTable), name='mcvcm_flag'))
 
-    print(f'\nReading infrared table: {infrared_catalogue}')
-    iTable = fits.open(infrared_catalogue)[1].data
+print(f'\nReading infrared table: {infrared_catalogue}')
+iTable = fits.open(infrared_catalogue)[1].data
 
-verboseprint('Table reading took %.2fs' %tt.interval)
 
 # ------------------------------------------ #	
 # generate coordinate lookup array
