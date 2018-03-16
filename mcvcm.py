@@ -688,7 +688,7 @@ def start():
 
     # Grab figure, axis object, and axis transform from cutoutslink.py
     fig, ax, axtrans, wcsmap = cutout.cutouts(mosaic, radioSB, radioRMS, tRA, tDEC,
-                                              osize=ipix_current, rsize=rpix_current, verbose=verbose)
+                                              isize=ipix_current, rsize=rpix_current, verbose=verbose)
     ax.set_title(tit)
     fig.canvas.draw_idle()
 

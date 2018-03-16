@@ -33,6 +33,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import reproject
 
+import warnings
+from astropy.utils.exceptions import AstropyWarning
+
+warnings.filterwarnings('ignore', category=AstropyWarning, append=True)
 # matplotlib.rcParams.update({'figure.autolayout': True})
 
 verbose = False
@@ -104,10 +108,11 @@ def arr_slice(arr, slicer, size):
     return sliced
 
 
-def cutouts(optical_image, radio_image, radio_rms, targetRA, targetDEC, osize = 200, rsize= 180, vmax=1.5, verbose=False):
+def cutouts(infrared_mosaic, radio_image, radio_rms, targetRA, targetDEC, isize=200, rsize=180, vmax=1.5,
+            verbose=False):
     ''' does things '''
 
-    from matplotlib.colors import PowerNorm#,LogNorm, SymLogNorm,
+    from matplotlib.colors import PowerNorm  # ,LogNorm, SymLogNorm,
 
     if fits.getdata(radio_image)[0][0].shape != fits.getdata(radio_rms)[0][0].shape:
         raise Exception('Check that the radio image and radio rms files match')
@@ -115,12 +120,12 @@ def cutouts(optical_image, radio_image, radio_rms, targetRA, targetDEC, osize = 
     target = [targetRA, targetDEC]
 
     # Work out the integer pixel position of the target coordinates in optical
-    omap_full = wcs.WCS(optical_image)
-    opix = omap_full.wcs_world2pix([target], 1) # wcs conversions take list of lists
-    opix = [int(x) for x in opix[0]] # ensure returned pixels are integer
+    imap_full = wcs.WCS(infrared_mosaic)
+    ipix = imap_full.wcs_world2pix([target], 1)  # wcs conversions take list of lists
+    ipix = [int(x) for x in ipix[0]]  # ensure returned pixels are integer
 
-    verboseprint('o_full shape', fits.getdata(optical_image).shape)
-    verboseprint('optical pix center', opix)
+    verboseprint('o_full shape', fits.getdata(infrared_mosaic).shape)
+    verboseprint('optical pix center', ipix)
 
     # Work out the integer pixel position of the target coordinates in radio
     rmap_full = wcs.WCS(radio_image).celestial
@@ -131,13 +136,13 @@ def cutouts(optical_image, radio_image, radio_rms, targetRA, targetDEC, osize = 
     verboseprint('radio pix center', rpix)
 
     # Create slicer and slice the optical image, and optical WCS map
-    half_osize = int(osize / 2.)
-    oslicer = np.s_[opix[1] - half_osize:opix[1] + half_osize,
-              opix[0] - half_osize:opix[0] + half_osize]  # (DEC:RA)
+    half_isize = int(isize / 2.)
+    oslicer = np.s_[ipix[1] - half_isize:ipix[1] + half_isize,
+              ipix[0] - half_isize:ipix[0] + half_isize]  # (DEC:RA)
 
-    ocut = arr_slice(fits.getdata(optical_image), oslicer, osize)
-    omap = omap_full[oslicer]  # Note: wcs map can't be sliced by arr_slice, do it manually
-    verboseprint('ocut shape', ocut.shape)
+    icut = arr_slice(fits.getdata(infrared_mosaic), oslicer, isize)
+    omap = imap_full[oslicer]  # Note: wcs map can't be sliced by arr_slice, do it manually
+    verboseprint('ocut shape', icut.shape)
 
     # Create slicer and slice the radio image, radio rms, and radio WCS map
     half_rsize = int(rsize / 2.)
@@ -159,9 +164,9 @@ def cutouts(optical_image, radio_image, radio_rms, targetRA, targetDEC, osize = 
     # Fails unless you specifying the shape_out (to be the same as what you are projecting onto)
     # Since omap doesn't have a .shape, ocut.shape is used instead
 
-    project_r, footprint = reproject.reproject_interp((rcut, rmap), omap, shape_out=ocut.shape)
+    project_r, footprint = reproject.reproject_interp((rcut, rmap), omap, shape_out=icut.shape)
 
-    figure = plt.figure(figsize=(6.55, 5.2))
+    figure = plt.figure()  # figsize=(6.55, 5.2))
     axis = figure.add_subplot(111, projection=omap)
     # fig.subplots_adjust(left=0.25, right=.60)
 
@@ -171,7 +176,7 @@ def cutouts(optical_image, radio_image, radio_rms, targetRA, targetDEC, osize = 
     #### CHANGE VMAX HERE TO SUIT YOUR DATA - (I just experimented) #####
     # plotting
     normalise = PowerNorm(gamma=.7)
-    axis.imshow(ocut, origin='lower', cmap='gist_heat_r', norm=normalise, vmax=vmax)  # origin='lower' for .fits files
+    axis.imshow(icut, origin='lower', cmap='gist_heat_r', norm=normalise, vmax=vmax)  # origin='lower' for .fits files
     axis.contour(np.arange(project_r.shape[0]), np.arange(project_r.shape[1]), project_r, levels=contours,
                  linewidths=1, smooth=16)
 
@@ -192,9 +197,10 @@ if __name__ == '__main__':
     optic = 'data/ELAIS/optical-r-mosaic.fits'
     target = [8.588891, -43.333966]
     # target = [8.740639, -43.919979]
-    fig, ax, axtrans,omap = cutouts(swire, radio, noise, target[0], target[1], osize=200, rsize=110, verbose=True)
+    fig, ax, axtrans, omap = cutouts(swire, radio, noise, target[0], target[1], isize=200, rsize=110, verbose=True)
     sources, = ax.plot(target[0], target[1], 'k*', transform=axtrans)
-    fig, ax, axtrans,omap = cutouts(optic, radio, noise, target[0], target[1], osize=400, rsize=210, vmax=40.5, verbose=True)
+    fig, ax, axtrans, omap = cutouts(optic, radio, noise, target[0], target[1], isize=400, rsize=210, vmax=40.5,
+                                     verbose=True)
     sources, = ax.plot(target[0], target[1], 'k*', transform=axtrans)
     # sources.remove()
 
