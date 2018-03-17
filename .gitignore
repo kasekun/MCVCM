@@ -1,0 +1,11 @@
+# Created by .ignore support plugin (hsz.mobi)
+.DS_Store
+.idea/MCVCM.iml
+.idea/dictionaries/
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
+__pycache__/
+data/
+demo_output/
+output/
