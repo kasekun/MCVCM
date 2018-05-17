@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # cutoutslink.py
@@ -110,8 +110,19 @@ def arr_slice(arr, slicer, size):
 
 def cutouts(infrared_mosaic, radio_image, radio_rms, targetRA, targetDEC, isize=200, rsize=180, vmax=1.5,
             verbose=False):
-    ''' does things '''
+    """
 
+    :param infrared_mosaic: asklujdhlkjhasdh
+    :param radio_image: asdljhaskljhda
+    :param radio_rms: asdioahsopd;a
+    :param targetRA:
+    :param targetDEC:
+    :param isize:
+    :param rsize:
+    :param vmax:
+    :param verbose:
+    :return:
+    """
     from matplotlib.colors import PowerNorm  # ,LogNorm, SymLogNorm,
 
     if fits.getdata(radio_image)[0][0].shape != fits.getdata(radio_rms)[0][0].shape:
