@@ -158,7 +158,7 @@ class Identity(object):
 
     def __init__(self):
         self.inf_host = self.default_inf_host
-        self.rad_host = self.default_rad_hostx
+        self.rad_host = self.default_rad_host
         self.components = [] #
         self.xid_tags = [] #
         # self.xid_positions = [] #
