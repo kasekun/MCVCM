@@ -6,15 +6,11 @@ This software was initially designed and coded to
 facilitate the cross-matching of the ATLAS 1.4 GHz radio source
 catalogue with DES photometric source catalogue. Initially, this
 cross-matching was performed directly between the radio data and optical
-\(I-\)band (e.g., ) and was later adapted to work with SWIRE
-\(3.6~\mu\)m infrared (achieving a more reliable cross-match, as
-established in ). During the necessary modifications to facilitate this,
+i-band (e.g., ) and was later adapted to work with SWIRE
+3.6um infrared (achieving a more reliable cross-match). 
+During the necessary modifications to facilitate this,
 I endeavoured to make this tool generalised and adaptable enough to be
-usable with any catalogue pairings. Following this, I have made the code
-available in a public repository (). MCVCM is being used in other
-projects – GLASS (GAMA Legacy ATCA Southern Survey) and GLEAM (GaLactic
-and Extragalactic All-sky MWA Survey) – which has encouraged the
-on-going development of the software.
+usable with any catalogue pairings. 
 
 ## Description
 
