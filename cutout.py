@@ -189,7 +189,7 @@ def cutouts(infrared_mosaic, radio_image, radio_rms, targetRA, targetDEC, isize=
     normalise = PowerNorm(gamma=.7)
     axis.imshow(icut, origin='lower', cmap='gist_heat_r', norm=normalise, vmax=vmax)  # origin='lower' for .fits files
     axis.contour(np.arange(project_r.shape[0]), np.arange(project_r.shape[1]), project_r, levels=contours,
-                 linewidths=1, smooth=16)
+                 linewidths=0.8)
 
     axis.set_autoscale_on(False)
     axis.coords['RA'].set_axislabel('Right Ascension')

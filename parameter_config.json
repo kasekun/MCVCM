@@ -7,13 +7,34 @@
     "infrared_dec": "dec",
     "infrared_id": "object"
   },
+  "start_index": 500,
   "cutout_pixels": {
     "radio": 95,
     "infrared": 170
   },
-  "start_index": 500,
   "figure_position": {
     "horizontal": 0,
     "vertical": 0
+  },
+  "image_scaling": {
+    "max_saturation": 1.5,
+    "power_normalise": 0.7
+  },
+  "markers": {
+    "phase1": {
+      "color": "g",
+      "marker": "x",
+      "markersize": 4
+    },
+    "phase2": {
+      "color": "g",
+      "marker": "+",
+      "markersize": 6
+    },
+    "phase3": {
+      "color": "g",
+      "marker": "*",
+      "markersize": 6
+    }
   }
 }

@@ -207,19 +207,13 @@ class Identity(object):
         else:
             component_count = len(self.components)+1
 
-        core_ID = '*'.join([self.rad_host[0],
-                            self.inf_host[0],
-                            'm%i' %component_count,
-                            'C0'])
+        core_ID = f'{self.rad_host[0]}*{self.inf_host[0]}*m{component_count}*C0'
         self.xid_tags.append((core_ID,self.rad_host[1]))
         # core_ID is attached to radio catalogue 'core' named rad_host[0]
         # at row rad_host[1]
 
         for c,comp in enumerate(self.components):
-            comp_ID = '*'.join([self.rad_host[0],
-                                self.inf_host[0],
-                                'm%i' %component_count,
-                                'C%i' %(c+1)])
+            comp_ID = f'{self.rad_host[0]}*{self.inf_host[0]}*m{component_count}*C{c+1}'
             self.xid_tags.append((comp_ID,comp[1]))
             # core_ID is attached to radio catalogue source named comp[0]
             # at row comp[1] - Since this is just the XID tag the combination
@@ -492,14 +486,16 @@ def next_phase():
     if phase == 1:
         # Switch to radio host tags/data
         sources.remove()
-        sources, = ax.plot(rData[rRA_column], rData[rDEC_column], '+g', ms=6, picker=6, transform=axtrans)
+        sources, = ax.plot(rData[rRA_column], rData[rDEC_column], picker=6, transform=axtrans, linestyle='none',
+                           **parameter_config['markers']['phase2'])
         phase_title = 'Radio core ID'
         ax.set_title(phase_title)
         fig.canvas.draw_idle()
     if phase == 2:
         # Switch to radio comp tags
         sources.remove()
-        sources, = ax.plot(rData[rRA_column], rData[rDEC_column], '*g', ms=6, picker=6, transform=axtrans)
+        sources, = ax.plot(rData[rRA_column], rData[rDEC_column], picker=6, transform=axtrans, linestyle='none',
+                           **parameter_config['markers']['phase3'])
         phase_title = 'Radio component IDs'
         ax.set_title(phase_title)
         fig.canvas.draw_idle()
@@ -698,7 +694,8 @@ def start():
     rData = rTable[rCoords.separation(target) < 240 * u.arcsec]
 
     # plot sources and assign for deletion later (comma is essential to deletion!)
-    sources, = ax.plot(iData[iRA_column], iData[iDEC_column], 'xg', ms=4, picker=6, transform=axtrans)
+    sources, = ax.plot(iData[iRA_column], iData[iDEC_column], picker=6, transform=axtrans, linestyle='none',
+                       **parameter_config['markers']['phase1'])
 
     # Start canvas listeners
     keyID = fig.canvas.mpl_connect('key_press_event', on_key)
