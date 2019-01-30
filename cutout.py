@@ -108,6 +108,87 @@ def arr_slice(arr, slicer, size):
     return sliced
 
 
+def cutouts2(infrared_mosaic, radio_image, radio_rms, targetRA, targetDEC, isize=200, rsize=180, vmax=1.5,
+             verbose=False):
+    """
+
+    :param infrared_mosaic: asklujdhlkjhasdh
+    :param radio_image: asdljhaskljhda
+    :param radio_rms: asdioahsopd;a
+    :param targetRA:
+    :param targetDEC:
+    :param isize:
+    :param rsize:
+    :param vmax:
+    :param verbose:
+    :return:
+    """
+    from matplotlib.colors import PowerNorm  # ,LogNorm, SymLogNorm,
+    from astropy.nddata.utils import Cutout2D
+
+    if fits.getdata(radio_image)[0][0].shape != fits.getdata(radio_rms)[0][0].shape:
+        raise Exception('Check that the radio image and radio rms files match')
+
+    target_radec = (targetRA, targetDEC)
+
+    # Work out the integer pixel position of the target coordinates in optical
+    imap_full = wcs.WCS(infrared_mosaic)
+    ipix = imap_full.wcs_world2pix([target_radec], 1)  # wcs conversions take list of lists
+    ipix = [int(x) for x in ipix[0]]  # ensure returned pixels are integer
+
+    verboseprint('o_full shape', fits.getdata(infrared_mosaic).shape)
+    verboseprint('optical pix center', ipix)
+
+    # Work out the integer pixel position of the target coordinates in radio
+    rmap_full = wcs.WCS(radio_image).celestial
+    rpix = rmap_full.wcs_world2pix([target_radec], 1)
+    rpix = [int(x) for x in rpix[0]]
+
+    verboseprint('r_full shape', fits.getdata(radio_image).shape)
+    verboseprint('radio pix center', rpix)
+
+    icut = Cutout2D(fits.getdata(infrared_mosaic), ipix, (isize, isize), mode='partial', fill_value=0.,
+                    wcs=wcs.WCS(infrared_mosaic).celestial)
+    imap = icut.wcs
+
+    rcut = Cutout2D(fits.getdata(radio_image)[0][0], rpix, (rsize, rsize), mode='partial', fill_value=0.,
+                    wcs=wcs.WCS(radio_image).celestial)
+    rmap = rcut.wcs
+
+    # Contours are to be in steps of (2^n)*(2.5*median(local_rms))
+    contours = [2 ** x for x in range(17)]
+    rms_cut = Cutout2D(fits.getdata(radio_rms)[0][0], rpix, (rsize, rsize), mode='partial', fill_value=np.nan)
+    rmap = rcut.wcs
+    local_rms = 2.5 * np.nanmedian(rms_cut.data.flatten())
+    contours = [local_rms * x for x in contours]
+
+    # project radio coordinates (rcut,rmap) onto optical projection omap
+    # Fails unless you specifying the shape_out (to be the same as what you are projecting onto)
+    # Since omap doesn't have a .shape, ocut.shape is used instead
+
+    project_r, footprint = reproject.reproject_interp((rcut.data, rmap), imap, shape_out=icut.data.shape)
+
+    figure = plt.figure()  # figsize=(6.55, 5.2))
+    axis = figure.add_subplot(111, projection=imap)
+    # fig.subplots_adjust(left=0.25, right=.60)
+
+    axtrans = axis.get_transform(
+        'fk5')  # necessary for scattering data on later -- e.g ax.plot(data, transform=axtrans)
+
+    #### CHANGE VMAX HERE TO SUIT YOUR DATA - (I just experimented) #####
+    # plotting
+    normalise = PowerNorm(gamma=.7)
+    axis.imshow(icut.data, origin='lower', cmap='gist_heat_r', norm=normalise,
+                vmax=vmax)  # origin='lower' for .fits files
+    axis.contour(np.arange(project_r.shape[0]), np.arange(project_r.shape[1]), project_r, levels=contours,
+                 linewidths=0.8)
+
+    axis.set_autoscale_on(False)
+    axis.coords['RA'].set_axislabel('Right Ascension')
+    axis.coords['DEC'].set_axislabel('Declination')
+
+    return figure, axis, axtrans, imap
+
 def cutouts(infrared_mosaic, radio_image, radio_rms, targetRA, targetDEC, isize=200, rsize=180, vmax=1.5,
             verbose=False):
     """

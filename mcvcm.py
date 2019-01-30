@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ATLASmultiID-SWIRE.py
+# mcvcm.py
 #
 # Interactive software for manually cross-matching infrared and radio catalogues
 # and assigning multi-component radio source associations.
@@ -63,7 +63,9 @@ import textwrap
 from utilities import *
 from tkComment import tkComment
 import json
+import os
 
+thisdir = os.path.dirname(os.path.abspath(__file__))
 
 def runtkc():
     global tkC
@@ -71,7 +73,7 @@ def runtkc():
     tkC.root.mainloop()
 
 
-with open('path_config.json', 'r') as config:
+with open(os.path.join(thisdir, 'path_config.json'), 'r') as config:
     field_choices = tuple(json.load(config).keys())
 
 
@@ -611,7 +613,7 @@ def save_fig(rID, manual = False):
             name = rTable[rID_column][target_index]
             filename = name+extention
 
-        save = os.path.join(fig_path,filename)
+        save = os.path.join(fig_path, filename)
         fig.savefig(save, bbox_inches='tight', dpi = 300)
         verboseprint('Saved' , filename)
         if manual: # restart ID as sources are now removed
@@ -684,8 +686,8 @@ def start():
     target = SkyCoord(tRA, tDEC, frame='fk5', unit='deg')
 
     # Grab figure, axis object, and axis transform from cutoutslink.py
-    fig, ax, axtrans, wcsmap = cutout.cutouts(mosaic, radioSB, radioRMS, tRA, tDEC,
-                                              isize=ipix_current, rsize=rpix_current, verbose=verbose)
+    fig, ax, axtrans, wcsmap = cutout.cutouts2(mosaic, radioSB, radioRMS, tRA, tDEC,
+                                               isize=ipix_current, rsize=rpix_current, verbose=verbose)
     ax.set_title(phase_title)
     fig.canvas.draw_idle()
 
@@ -732,24 +734,24 @@ else:
 # ------------------------------------------ #	
 # Read in required file paths from config file
 
-with open('path_config.json', 'r') as config:
+with open(os.path.join(thisdir, 'path_config.json'), 'r') as config:
     path_config = json.load(config)
 
 # field is specified in launch arguments
-radioSB = path_config[field]["radio_continuum"]
-radioRMS = path_config[field]["radio_rms"]
-mosaic = path_config[field]["infrared_mosaic"]
-radio_catalogue = path_config[field]["radio_catalog"]
-infrared_catalogue = path_config[field]["infrared_catalog"]
+radioSB = os.path.join(thisdir, path_config[field]["radio_continuum"])
+radioRMS = os.path.join(thisdir, path_config[field]["radio_rms"])
+mosaic = os.path.join(thisdir, path_config[field]["infrared_mosaic"])
+radio_catalogue = os.path.join(thisdir, path_config[field]["radio_catalog"])
+infrared_catalogue = os.path.join(thisdir, path_config[field]["infrared_catalog"])
 output_name = f'{field}_mcvcm_table.dat'
 
 # output path for saved files
 if doing_demo:
-    save_path = os.path.join(table_path, f'demo-{output_name}')
+    save_path = os.path.join(thisdir, table_path, f'demo-{output_name}')
 else:
-    save_path = os.path.join(table_path, output_name)
+    save_path = os.path.join(thisdir, table_path, output_name)
 
-with open('parameter_config.json', 'r') as config:
+with open(os.path.join(thisdir, 'parameter_config.json'), 'r') as config:
     parameter_config = json.load(config)
 
 figure_pos_horizontal = parameter_config["figure_position"]["horizontal"]
